@@ -1,0 +1,9 @@
+[
+  {
+    "label": "Build Binary",
+    "adapter": "CodeLLDB",
+    "program": "path_to_program",
+    "request": "launch",
+    "build": "my build task", // Or "my build task for $ZED_FILE"
+  },
+]

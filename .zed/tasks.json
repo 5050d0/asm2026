@@ -1,0 +1,15 @@
+[
+  {
+    "label": "Compile&run lab1",
+    "command": "cd 1 && nasm -felf64 -gdwarf hello.asm && ld hello.o && ./a.out",
+    //"args": [],
+    "env": { "foo": "bar" },
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "never",
+    "shell": "system",
+    "show_summary": true,
+    "show_command": true,
+  },
+]
