@@ -40,7 +40,6 @@ add rax, rbx; числитель -> rax
 jo HANDLE_ERR
 
 movsx rbx, dword [rel b]
-
 test rbx, rbx; проверка на 0
 jz HANDLE_ERR
 imul rbx, rbx ; знаменатель -> rbx
@@ -50,7 +49,6 @@ jo HANDLE_ERR
 
 idiv rbx; rdx:rax/rbx -> rax - частное, rdx - ост
 mov [rel res], rax
-nop
 
 mov rdi, 0 ; 0  exit code
 jmp EXIT;
