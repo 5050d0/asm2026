@@ -21,24 +21,27 @@ movsxd rdx, dword [c]
 sub rbx, rdx ; a-c может переполниться, надо проверить
 jo HANDLE_ERR
 
-
-imul rax, rbx ; (d+b)*(a-c) -> rax
+imul rbx ; (d+b)*(a-c) -> rdx:rax
 jo HANDLE_ERR
 
-movsx rbx, word [e]
-;movsxd rcx, dword [b]
-sub rbx, r8 ; 8 - 32 может выйти  за 32, но не за 64
 
-movsx rcx, word [e]
+movsx r9, word [e]
+mov rcx, r9
 ;movsxd r8, dword [b]
 add rcx, r8 ; 16 + 32
 
-imul rbx, rcx ; (e-b)(e+b) ->rbx
-jo HANDLE_ERR
+;movsxd rcx, dword [b]
+sub r9, r8 ; 8 - 32 может выйти  за 32, но не за 64
 
 
-add rax, rbx; числитель -> rax
-jo HANDLE_ERR
+imul r9, rcx ; (e-b)(e+b) -> r9
+;jo HANDLE_ERR
+
+; todo тут надо r9 + rdx:rax
+
+
+;add rax, rbx; числитель -> rax
+;jo HANDLE_ERR
 
 ;movsxd rbx, dword [b]
 test r8, r8; проверка на 0
