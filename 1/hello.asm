@@ -26,16 +26,16 @@ jo HANDLE_ERR
 
 movsx rbx, word [rel e]
 movsx rcx,dword [rel b]
-sub rbx, rcx ; 8 - 32 может выйти  за 32
+sub rbx, rcx ; 8 - 32 может выйти  за 32, но не за 64
 
 movsx rcx, word [rel e]
-movsx rsp, dword [rel b]
-add rcx, rsp ; 16 + 32
+movsx r8, dword [rel b]
+add rcx, r8 ; 16 + 32
 
 imul rbx, rcx ; (e-b)(e+b) ->rbx
 jo HANDLE_ERR
 
-xor rdx, rdx ;
+
 add rax, rbx; числитель -> rax
 jo HANDLE_ERR
 
@@ -46,7 +46,7 @@ imul rbx, rbx ; знаменатель -> rbx
 jo HANDLE_ERR
 
 
-
+cqo; rax -> rdx:rax
 idiv rbx; rdx:rax/rbx -> rax - частное, rdx - ост
 mov [rel res], rax
 
