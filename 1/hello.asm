@@ -1,4 +1,5 @@
 bits 64
+default rel
 global _start
 
 section .data
@@ -11,12 +12,12 @@ res dq 0
 
 section .text
 _start:
-movsx rax, dword [rel b]
-movsx rbx, byte [rel d]
+movsxd rax, dword [b]
+movsx rbx, byte [d]
 add rax, rbx ; d+b 32+8 может выйти за 32, но за 64 не может
 
-mov rbx, [rel a]
-movsx rdx, dword [rel c]
+mov rbx, [a]
+movsxd rdx, dword [c]
 sub rbx, rdx ; a-c может переполниться, надо проверить
 jo HANDLE_ERR
 
@@ -24,12 +25,12 @@ jo HANDLE_ERR
 imul rax, rbx ; (d+b)*(a-c) -> rax
 jo HANDLE_ERR
 
-movsx rbx, word [rel e]
-movsx rcx,dword [rel b]
+movsx rbx, word [e]
+movsxd rcx, dword [b]
 sub rbx, rcx ; 8 - 32 может выйти  за 32, но не за 64
 
-movsx rcx, word [rel e]
-movsx r8, dword [rel b]
+movsx rcx, word [e]
+movsxd r8, dword [b]
 add rcx, r8 ; 16 + 32
 
 imul rbx, rcx ; (e-b)(e+b) ->rbx
@@ -39,7 +40,7 @@ jo HANDLE_ERR
 add rax, rbx; числитель -> rax
 jo HANDLE_ERR
 
-movsx rbx, dword [rel b]
+movsxd rbx, dword [b]
 test rbx, rbx; проверка на 0
 jz HANDLE_ERR
 imul rbx, rbx ; знаменатель -> rbx
@@ -47,8 +48,8 @@ jo HANDLE_ERR
 
 
 cqo; rax -> rdx:rax
-idiv rbx; rdx:rax/rbx -> rax - частное, rdx - ост
-mov [rel res], rax
+idiv rbx; rdx:rax/rbx -> rax - частное, rdx - ост; не может переполни
+mov [res], rax
 
 mov rdi, 0 ; 0  exit code
 jmp EXIT;
