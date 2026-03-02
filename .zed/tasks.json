@@ -1,7 +1,7 @@
 [
   {
     "label": "Compile&run lab1",
-    "command": "cd 1 && nasm -felf64 -gdwarf -Wall hello.asm && ld hello.o && ./a.out",
+    "command": "cd 1 && make run",
     //"args": [],
     "env": { "foo": "bar" },
     "use_new_terminal": false,

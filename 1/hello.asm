@@ -56,7 +56,7 @@ jo HANDLE_ERR
 
 
 ;cqo; rax -> rdx:rax
-idiv rbx; rdx:rax/rbx -> rax - частное, rdx - ост; не может переполни
+idiv rbx; rdx:rax/rbx -> rax - частное, rdx - ост;
 mov [res], rax
 
 mov rdi, 0 ; 0  exit code
