@@ -3,11 +3,11 @@ default rel
 global _start
 
 section .data
-a dq 1
-b dd 2
-c dd 3
-d db 4
-e dw 5
+a dq 9223372036854775807
+b dd 6
+c dd 0
+d db 100
+e dw -33
 res dq 0
 
 section .text
@@ -22,7 +22,7 @@ sub rbx, rdx ; a-c может переполниться, надо провер�
 jo HANDLE_ERR
 
 imul rbx ; (d+b)*(a-c) -> rdx:rax
-jo HANDLE_ERR
+# jo HANDLE_ERR
 mov r10, rdx
 mov r11, rax ; rdx:rax -> r10:r11
 
@@ -38,7 +38,7 @@ sub rax, r8 ; 8 - 32 может выйти  за 32, но не за 64
 imul rcx; (e-b)(e+b) -> rdx:rax
 
 add rax, r11
-adc rdx, r10
+adc rdx, r10 ; rdx:rax + r10:r11 = rdx:rax
 jo HANDLE_ERR
 ;imul r9, rcx ; (e-b)(e+b) -> r9
 
@@ -51,12 +51,12 @@ jo HANDLE_ERR
 ;movsxd rbx, dword [b]
 test r8, r8; проверка на 0
 jz HANDLE_ERR
-imul rbx, rbx ; знаменатель -> rbx
+imul r8, r8 ; знаменатель -> rbx
 jo HANDLE_ERR
 
 
 ;cqo; rax -> rdx:rax
-idiv rbx; rdx:rax/rbx -> rax - частное, rdx - ост;
+idiv r8; rdx:rax/rbx -> rax - частное, rdx - ост;
 mov [res], rax
 
 mov rdi, 0 ; 0  exit code
