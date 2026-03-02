@@ -23,19 +23,24 @@ jo HANDLE_ERR
 
 imul rbx ; (d+b)*(a-c) -> rdx:rax
 jo HANDLE_ERR
+mov r10, rdx
+mov r11, rax ; rdx:rax -> r10:r11
 
 
-movsx r9, word [e]
-mov rcx, r9
+movsx rax, word [e]
+mov rcx, rax
 ;movsxd r8, dword [b]
 add rcx, r8 ; 16 + 32
 
 ;movsxd rcx, dword [b]
-sub r9, r8 ; 8 - 32 может выйти  за 32, но не за 64
+sub rax, r8 ; 8 - 32 может выйти  за 32, но не за 64
 
+imul rcx; (e-b)(e+b) -> rdx:rax
 
-imul r9, rcx ; (e-b)(e+b) -> r9
-;jo HANDLE_ERR
+add rax, r11
+adc rdx, r10
+jo HANDLE_ERR
+;imul r9, rcx ; (e-b)(e+b) -> r9
 
 ; todo тут надо r9 + rdx:rax
 
@@ -50,7 +55,7 @@ imul rbx, rbx ; знаменатель -> rbx
 jo HANDLE_ERR
 
 
-cqo; rax -> rdx:rax
+;cqo; rax -> rdx:rax
 idiv rbx; rdx:rax/rbx -> rax - частное, rdx - ост; не может переполни
 mov [res], rax
 
