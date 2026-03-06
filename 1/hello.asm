@@ -4,7 +4,7 @@ global _start
 
 section .data
 a dq 9223372036854775807
-b dd 6
+b dd 60000
 c dd 0
 d db 100
 e dw -33
@@ -22,40 +22,41 @@ sub rbx, rdx ; a-c может переполниться, надо провер�
 jo HANDLE_ERR
 
 imul rbx ; (d+b)*(a-c) -> rdx:rax
-# jo HANDLE_ERR
 mov r10, rdx
 mov r11, rax ; rdx:rax -> r10:r11
 
 
 movsx rax, word [e]
 mov rcx, rax
-;movsxd r8, dword [b]
 add rcx, r8 ; 16 + 32
 
-;movsxd rcx, dword [b]
 sub rax, r8 ; 8 - 32 может выйти  за 32, но не за 64
 
 imul rcx; (e-b)(e+b) -> rdx:rax
+; не может переполниться
 
 add rax, r11
 adc rdx, r10 ; rdx:rax + r10:r11 = rdx:rax
 jo HANDLE_ERR
-;imul r9, rcx ; (e-b)(e+b) -> r9
 
-; todo тут надо r9 + rdx:rax
-
-
-;add rax, rbx; числитель -> rax
-;jo HANDLE_ERR
-
-;movsxd rbx, dword [b]
 test r8, r8; проверка на 0
 jz HANDLE_ERR
-imul r8, r8 ; знаменатель -> rbx
+imul r8, r8 ; знаменатель -> r8
 jo HANDLE_ERR
+mov rbx, r8
 
+;будет переполнение если rdx:rax/rbx >= 2^63
+; rdx:rax/2^63 >= rbx, rax/2^63 <=1
+; rdx >= rbx
+mov r10, rdx
+test r10, r10
+jns SKIP_ABS
+neg r10
+SKIP_ABS:
+cmp r10, rbx
+jns HANDLE_ERR
+jz HANDLE_ERR
 
-;cqo; rax -> rdx:rax
 idiv r8; rdx:rax/rbx -> rax - частное, rdx - ост;
 mov [res], rax
 
