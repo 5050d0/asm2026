@@ -4,10 +4,11 @@ global _start
 
 section .data
 a dq 9223372036854775807
-b dd 60000
+b dd 2147483489
 c dd 0
-d db 100
-e dw -33
+d db 117
+e dw 25000
+
 res dq 0
 
 section .text
