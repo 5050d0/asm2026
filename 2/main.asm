@@ -58,7 +58,11 @@ inner_loop:
     mov bl, byte [r8 + rdx]       ; bl = array[i + шаг]
 
     cmp al, bl
+%ifdef DESCENDING
+    jge no_swap
+%else
     jle no_swap
+%endif
 
     mov byte [r8 + r12], bl
     mov byte [r8 + rdx], al
