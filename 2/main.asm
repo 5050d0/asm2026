@@ -6,8 +6,8 @@ section .data
 matx db 4
 maty db 2
 mat:
-    db 8, -5, 7, -1
-    db 3, -12, 5, 0
+    db 125, -125, 127, -124
+    db 123, -122, 125, 0
 
 section .text
 
