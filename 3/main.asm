@@ -70,7 +70,7 @@ FIND_FILE:
     syscall
     test rax, rax
     js  .file_error
-    mov r12, rax
+    mov r15, rax
     jmp cont
 
 .file_error:
@@ -80,7 +80,7 @@ FIND_FILE:
     mov rdx, error_file_len
     syscall
     jmp HANDLE_ERR
-; теперь file в r12 или ушли в ошибку
+; теперь file в r15 или ушли в ошибку
 
 
 cont:
@@ -125,19 +125,32 @@ cont:
 
 .aaa:
     test r8b, r8b
-    jnz .skip
-    cmp r12b, r12b
-.skip
+    jz .set_new_letter
+    cmp r12b, r8b
+    je .skip_letter
 
-.next:
+    mov [r11], r12b
+    inc r11
+.skip_letter:
+    inc r10
+    dec rax
+    jnz .copy_loop
+    jmp .finish
+
+.set_new_letter
+    mov r8b, r12b
+    inc r10
+    dec rax
+    jnz .copy_loop
+    jmp .finish
 
 .finish:
 
 
-
-    mov rdx, rax               ; bytes read
+    sub r11, writebuf
+    mov rdx, r11               ; bytes to write
     mov rax, 1                 ; sys_write
-    mov rdi, r12
+    mov rdi, r15
     mov rsi, writebuf
     syscall
     jmp .read_loop
@@ -146,7 +159,7 @@ cont:
 
 .close:
     mov rax, 3                 ; sys_close
-    mov rdi, r12
+    mov rdi, r15
     syscall
 
 .exit:
