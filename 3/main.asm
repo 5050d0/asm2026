@@ -21,7 +21,7 @@ env_key_len equ $ - env_key -1
 
 section .bss
     buf resb BUFSIZE
-
+    writebuf resb BUFSIZE
 section .text
     global _start
 
@@ -38,11 +38,11 @@ FIND_FILE:
     mov rcx, env_key_len
     mov rdx, rdi
     mov r8, env_key
-    ;lea r8,  [rel env_key]
+
 .cmp_loop:
     mov al, [rdx]
-    mov bl, [r8]
-    cmp al, bl
+    mov r9b, [r8]
+    cmp al, r9b
     jne .next_env
     inc rdx
     inc r8
@@ -65,12 +65,13 @@ FIND_FILE:
 .continue:
     mov rax, 2 ; sys_open
     mov rdi, rdx
-    mov rsi, 65 ; O_CREAT | O_WRONLY
-    mov rdx, 0
+    mov rsi, 1+64+512 ; O_CREAT | O_WRONLY | O_TRUNC
+    mov rdx, 0644o
     syscall
     test rax, rax
     js  .file_error
     mov r12, rax
+    jmp cont
 
 .file_error:
     mov rax, 1
@@ -80,21 +81,66 @@ FIND_FILE:
     syscall
     jmp HANDLE_ERR
 ; теперь file в r12 или ушли в ошибку
-READ_LOOP:
+
+
+cont:
+    mov r8b, 0 ; is letter found
+    mov r9b, 0 ; letter
+.read_loop:
+    mov eax, 1
+    mov edi, 1
+    mov rsi, msg_invite
+    mov edx, msg_invite_len
+    syscall
+
     mov rax, 0                 ; sys_read
-    mov rdi, 1
-    lea rsi, [rel buf]
+    mov rdi, 0
+    mov rsi, buf
     mov rdx, BUFSIZE
     syscall
     test rax, rax
     jle .close
 
+    mov r10, buf
+    mov r11, writebuf
+.copy_loop:
+    mov r12b, [r10]
+; \t \n -> found =0
+; r12b == letter -> no copy
+    cmp r12b, 10 ; \n
+    je .set_found
+    cmp r12b, 32 ; ' '
+    je .set_found
+    cmp r12b, 9 ; \t
+    je .set_found
+    jmp .aaa
+.set_found:
+    mov r8b, 0
+    mov [r11], r12b
+    inc r11
+    inc r10
+    dec rax
+    jnz .copy_loop
+    jmp .finish
+
+.aaa:
+    test r8b, r8b
+    jnz .skip
+    cmp r12b, r12b
+.skip
+
+.next:
+
+.finish:
+
+
+
     mov rdx, rax               ; bytes read
     mov rax, 1                 ; sys_write
     mov rdi, r12
-    mov rsi, buf
+    mov rsi, writebuf
     syscall
-    jmp READ_LOOP
+    jmp .read_loop
 
 
 
@@ -107,21 +153,6 @@ READ_LOOP:
     mov rax, 60                ; sys_exit
     xor rdi, rdi
     syscall
-
-
-    ; mov eax, 1
-    ; mov edi, 1
-    ; mov rsi, msg_invite
-    ; mov edx, msg_invite_len
-    ; syscall
-
-    ; xor eax, eax
-    ; xor edi, edi
-    ; mov rsi, str
-    ; mov edx, size
-    ; syscall
-
-
 
 exit_ok:
     mov rdi, 0
