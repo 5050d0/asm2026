@@ -12,12 +12,14 @@ error_env_not_found_len equ $ - error_env_not_found
 
 error_file db "Error opening file", 10, 0
 error_file_len equ $ - error_file
+error_file_write db "Error writing to file", 10, 0
+error_file_write_len equ $ - error_file_write
 
 env_key     db "FILENAME=", 0
 env_key_len equ $ - env_key -1
 
 
-%define BUFSIZE 4096
+%define BUFSIZE 10
 
 section .bss
     buf resb BUFSIZE
@@ -143,6 +145,7 @@ cont:
     inc r10
     dec rax
     jnz .copy_loop
+    jmp .finish
 .aaa:
     test r8b, r8b
     jz .set_new_letter
@@ -172,6 +175,8 @@ cont:
     mov rdi, r15
     mov rsi, writebuf
     syscall
+    cmp rax, rdx
+    jne .write_error
     jmp .read_loop
 
 .close:
@@ -179,14 +184,16 @@ cont:
     mov rdi, r15
     syscall
 
-.exit:
-    mov rax, 60                ; sys_exit
-    xor rdi, rdi
-    syscall
-
-exit_ok:
+.exit_ok:
     mov rdi, 0
     jmp EXIT
+.write_error:
+    mov rax, 1
+    mov rdi, 2
+    mov rsi, error_file_write
+    mov rdx, error_file_write_len
+    syscall
+    jmp HANDLE_ERR
 
 HANDLE_ERR:
     mov rdi, 1
