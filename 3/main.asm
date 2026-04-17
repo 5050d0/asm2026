@@ -82,7 +82,6 @@ FIND_FILE:
     jmp HANDLE_ERR
 ; теперь file в r15 или ушли в ошибку
 
-
 cont:
     mov r8b, 0 ; is letter found
     mov r9b, 0 ; letter
@@ -105,8 +104,8 @@ cont:
     mov r11, writebuf
 .copy_loop:
     mov r12b, [r10]
-; \t \n -> found =0
-; r12b == letter -> no copy
+;found &&  \t \n -> found =0
+; r12b == letter | \t \n -> no copy
     cmp r12b, 10 ; \n
     je .set_found
     cmp r12b, 32 ; ' '
@@ -115,14 +114,19 @@ cont:
     je .set_found
     jmp .aaa
 .set_found:
+    test r8b, r8b
+    jz .skip_multi_space
     mov r8b, 0
-    mov [r11], r12b
+    mov [r11], 32 ; ' '
     inc r11
     inc r10
     dec rax
     jnz .copy_loop
     jmp .finish
-
+.skip_multi_space:
+    inc r10
+    dec rax
+    jnz .copy_loop
 .aaa:
     test r8b, r8b
     jz .set_new_letter
@@ -137,16 +141,13 @@ cont:
     jnz .copy_loop
     jmp .finish
 
-.set_new_letter
-    mov r8b, r12b
+.set_new_letter:    mov r8b, r12b
     inc r10
     dec rax
     jnz .copy_loop
     jmp .finish
 
 .finish:
-
-
     sub r11, writebuf
     mov rdx, r11               ; bytes to write
     mov rax, 1                 ; sys_write
@@ -154,8 +155,6 @@ cont:
     mov rsi, writebuf
     syscall
     jmp .read_loop
-
-
 
 .close:
     mov rax, 3                 ; sys_close
