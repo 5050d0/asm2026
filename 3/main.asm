@@ -85,6 +85,7 @@ FIND_FILE:
 cont:
     mov r8b, 0 ; is letter found
     mov r9b, 0 ; letter
+    mov r13b, 0 ; is at least one letter written
 .read_loop:
     mov eax, 1
     mov edi, 1
@@ -117,6 +118,9 @@ cont:
     test r8b, r8b
     jz .skip_multi_space
     mov r8b, 0
+    test r13b, r13b
+    jz .skip_multi_space
+    mov r13b, 0
     mov [r11], 32 ; ' '
     inc r11
     inc r10
@@ -134,6 +138,7 @@ cont:
     je .skip_letter
 
     mov [r11], r12b
+    mov r13b, 1
     inc r11
 .skip_letter:
     inc r10
@@ -143,8 +148,6 @@ cont:
 
 .set_new_letter:
     mov r8b, r12b
-    mov [r11], r12b
-    inc r11
     inc r10
     dec rax
     jnz .copy_loop
