@@ -141,7 +141,10 @@ cont:
     jnz .copy_loop
     jmp .finish
 
-.set_new_letter:    mov r8b, r12b
+.set_new_letter:
+    mov r8b, r12b
+    mov [r11], r12b
+    inc r11
     inc r10
     dec rax
     jnz .copy_loop
