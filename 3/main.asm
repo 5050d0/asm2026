@@ -4,7 +4,7 @@ global _start
 
 section .data
 
-msg_invite    db "Enter line: "
+msg_invite    db "Enter your lines:", 10, 0
 msg_invite_len equ $-msg_invite
 
 error_env_not_found db "Environment varible FILENAME not found",10,0
@@ -83,15 +83,16 @@ FIND_FILE:
 ; теперь file в r15 или ушли в ошибку
 
 cont:
-    mov r8b, 0 ; is letter found
-    mov r9b, 0 ; letter
-    mov r13b, 0 ; is at least one letter written
-.read_loop:
     mov eax, 1
     mov edi, 1
     mov rsi, msg_invite
     mov edx, msg_invite_len
     syscall
+
+    mov r8b, 0 ; is letter found
+    mov r9b, 0 ; letter
+    mov r13b, 0 ; is at least one letter written
+.read_loop:
 
     mov rax, 0                 ; sys_read
     mov rdi, 0
