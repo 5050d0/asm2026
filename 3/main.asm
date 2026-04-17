@@ -108,13 +108,24 @@ cont:
 ;found &&  \t \n -> found =0
 ; r12b == letter | \t \n -> no copy
     cmp r12b, 10 ; \n
-    je .set_found
+    je .handle_newline
     cmp r12b, 32 ; ' '
-    je .set_found
+    je .handle_space
     cmp r12b, 9 ; \t
-    je .set_found
+    je .handle_space
     jmp .aaa
-.set_found:
+.handle_newline:
+    mov r8b, 0 ; is letter found
+    mov r9b, 0 ; letter
+    mov r13b, 0 ; is at least one letter written
+    inc r10
+    mov [r11], 10
+    inc r11
+    dec rax
+    jnz .copy_loop
+    jmp .finish
+
+.handle_space:
     test r8b, r8b
     jz .skip_multi_space
     mov r8b, 0
