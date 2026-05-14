@@ -7,8 +7,10 @@ section .data
     msg_alf  db "Enter alpha:", 0
     msg_e    db "Enter epsilon:", 0
     fmt_input      db "%f", 0
-    fmt_output_left db "Left result: %f", 10, 0
+    fmt_output_math db "Math result: %f", 10, 0
+    fmt_output_series db "Series summ: %f", 10, 0
     float_one dd 1.0
+    abs_mask dd 0x7fffffff
 
 section .bss
     x        resd 1
@@ -79,23 +81,25 @@ main:
 
     cvtss2sd xmm0, xmm0
     mov rax, 1
-    mov rdi, fmt_output_left
+    mov rdi, fmt_output_math
     call printf
 
     ;ряд
     ;xmm0 - summ, xmm1 - delta, xmm2 -epsilon xmm3 - x xmm4 - alpha+1
     ; xmm5 - n xmm6 =1.0
+    ; xmm9 - abs mask
     movd xmm0, [float_one]
-    movq xmm1, xmm0
+    movss xmm1, xmm0
     movd xmm2, [epsilon]
     movd xmm3, [x]
     movd xmm4, [alpha]
     addss xmm4, xmm0
-    movq xmm5, xmm0
-    movq xmm6, xmm0
+    movss xmm5, xmm0
+    movss xmm6, xmm0
+    movss xmm9, [abs_mask]
 
     main_loop:
-        movq xmm7, xmm4
+        movss xmm7, xmm4
         subss xmm7, xmm5
         divss xmm7,xmm5
         mulss xmm7, xmm3
@@ -103,13 +107,19 @@ main:
 
         addss xmm0, xmm1
         addss xmm5, xmm6
-        ; check if delta is less than epsilon
-        movq xmm8, xmm7
+
+
+        movss xmm8, xmm1
+        andps xmm8, xmm9
         cmpltss xmm8, xmm2
         movq rax, xmm8
         test rax,rax
-        jnz main_loop
+        jz main_loop
 
+    cvtss2sd xmm0, xmm0
+    mov rax, 1
+    mov rdi, fmt_output_series
+    call printf
 
     jmp exit_success
 
