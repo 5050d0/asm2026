@@ -83,7 +83,33 @@ main:
     call printf
 
     ;ряд
-    
+    ;xmm0 - summ, xmm1 - delta, xmm2 -epsilon xmm3 - x xmm4 - alpha+1
+    ; xmm5 - n xmm6 =1.0
+    movd xmm0, [float_one]
+    movq xmm1, xmm0
+    movd xmm2, [epsilon]
+    movd xmm3, [x]
+    movd xmm4, [alpha]
+    addss xmm4, xmm0
+    movq xmm5, xmm0
+    movq xmm6, xmm0
+
+    main_loop:
+        movq xmm7, xmm4
+        subss xmm7, xmm5
+        divss xmm7,xmm5
+        mulss xmm7, xmm3
+        mulss xmm1, xmm7
+
+        addss xmm0, xmm1
+        addss xmm5, xmm6
+        ; check if delta is less than epsilon
+        movq xmm8, xmm7
+        cmpltss xmm8, xmm2
+        movq rax, xmm8
+        test rax,rax
+        jnz main_loop
+
 
     jmp exit_success
 
