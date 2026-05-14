@@ -6,6 +6,8 @@ section .data
     msg_x    db "Enter x:", 0
     msg_alf  db "Enter alpha:", 0
     msg_e    db "Enter epsilon:", 0
+    msg_error_input db "Invalid input!", 10,0
+    msg_error_range db "Input out of range!", 10,0
     fmt_input      db "%f", 0
     fmt_output_math db "Math result: %f", 10, 0
     fmt_output_series db "Series summ: %f", 10, 0
@@ -16,7 +18,6 @@ section .bss
     x        resd 1
     alpha    resd 1
     epsilon  resd 1
-    t        resd 1
 
 section .text
 extern printf
@@ -44,7 +45,13 @@ get_float:
     pop rbx
     pop rbp
 
-    xor rax, rax ; todo add error checking
+    cmp rax,1
+    je .ok
+    mov rax, 1
+    jmp .ret
+.ok:
+    xor rax, rax
+.ret:
     ret
 
 main:
@@ -56,19 +63,28 @@ main:
     mov rsi, alpha
     call get_float
     test rax, rax
-    jnz exit_error
+    jnz exit_error_input
 
     mov rdi, msg_x
     mov rsi, x
     call get_float
     test rax, rax
-    jnz exit_error
+    jnz exit_error_input
+
+    movd xmm0, [x]
+    movd xmm1, [abs_mask]
+    movd xmm2, [float_one]
+    andps xmm0, xmm1
+    cmpltss xmm0, xmm2
+    movq rdi, xmm0
+    test rdi,rdi
+    jz exit_error_range
 
     mov rdi, msg_e
     mov rsi, epsilon
     call get_float
     test rax, rax
-    jnz exit_error
+    jnz exit_error_input
 
 
     ;левая часть
@@ -122,6 +138,18 @@ main:
     call printf
 
     jmp exit_success
+
+
+exit_error_range:
+    mov rdi, msg_error_range
+    xor rax, rax
+    call printf
+    jmp exit_error
+exit_error_input:
+    mov rdi, msg_error_input
+    xor rax, rax
+    call printf
+    jmp exit_error
 
 exit_error:
     mov rax, 1
