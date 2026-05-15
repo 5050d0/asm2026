@@ -8,6 +8,9 @@ section .data
     msg_e    db "Enter epsilon:", 0
     msg_error_input db "Invalid input!", 10,0
     msg_error_range db "Input out of range!", 10,0
+    msg_error_file  db "Cannot open file!", 10, 0
+    msg_usage       db "Usage: %s output_file", 10, 0
+    fmt_open        db "w+", 0
     fmt_input      db "%f", 0
     fmt_output_math db "Math result: %f", 10, 0
     fmt_output_series db "Series summ: %f", 10, 0
@@ -18,17 +21,23 @@ section .bss
     x        resd 1
     alpha    resd 1
     epsilon  resd 1
+    fileptr  resq 1
 
 section .text
 extern printf
 extern scanf
 extern powf
+extern fopen
+extern fclose
+extern fprintf
 
 ;in: rdi - string ptr, rsi - float ptr
 ; ret: rax - 0 if success
 get_float:
     push rbp
     mov rbp, rsp
+
+
 
     push rbx
     sub rsp, 8
@@ -57,6 +66,18 @@ get_float:
 main:
     push rbp
     mov rbp, rsp
+
+    cmp rdi,1
+    jle exit_error_usage
+    cmp rdi,3
+    jge exit_error_usage
+
+    mov rdi, [rsi+8]
+    mov rsi, fmt_open
+    call fopen
+
+    test rax, rax
+    jz exit_error_file
 
     ; Ввод
     mov rdi, msg_alf
@@ -139,7 +160,17 @@ main:
 
     jmp exit_success
 
-
+exit_error_file:
+    mov rdi, msg_error_file
+    xor rax, rax
+    call printf
+    jmp exit_error
+exit_error_usage:
+    mov  rdi, msg_usage
+    mov  rsi, [rsi]
+    xor  rax, rax
+    call printf
+    jmp  exit_error
 exit_error_range:
     mov rdi, msg_error_range
     xor rax, rax

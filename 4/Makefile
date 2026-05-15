@@ -1,5 +1,5 @@
-run: a.out
-	./a.out
+# run: a.out
+	# ./a.out
 
 a.out: main.o
 	gcc -no-pie main.o -o a.out -lm
