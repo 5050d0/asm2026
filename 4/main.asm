@@ -12,6 +12,7 @@ section .data
     msg_usage       db "Usage: %s output_file", 10, 0
     fmt_open        db "w+", 0
     fmt_input      db "%f", 0
+    fmt_filewrite       db "%f", 10, 0
     fmt_output_math db "Math result: %f", 10, 0
     fmt_output_series db "Series summ: %f", 10, 0
     float_one dd 1.0
@@ -136,10 +137,33 @@ main:
     movss xmm6, xmm0
     movss xmm9, [abs_mask]
     mov r12, [fileptr]
-
+    mov r13, fmt_filewrite
     main_loop:
     ;запись в файл
-        
+        sub rsp, 32
+        movss [rsp], xmm0
+        movss [rsp+4], xmm1
+        movss [rsp+8], xmm2
+        movss [rsp+12], xmm3
+        movss [rsp+16], xmm4
+        movss [rsp+20], xmm5
+        movss [rsp+24], xmm6
+        movss [rsp+28], xmm9
+        mov rdi, r12
+        mov rsi, r13
+        cvtss2sd xmm0, xmm1
+        mov rax, 1
+        call fprintf
+
+        movss xmm0, [rsp]
+        movss xmm1, [rsp+4]
+        movss xmm2, [rsp+8]
+        movss xmm3, [rsp+12]
+        movss xmm4, [rsp+16]
+        movss xmm5, [rsp+20]
+        movss xmm6, [rsp+24]
+        movss xmm9, [rsp+28]
+        add rsp, 32
     ; осн. логика
         movss xmm7, xmm4
         subss xmm7, xmm5
