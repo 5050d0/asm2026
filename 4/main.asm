@@ -78,6 +78,7 @@ main:
 
     test rax, rax
     jz exit_error_file
+    mov [fileptr], rax
 
     ; Ввод
     mov rdi, msg_alf
@@ -134,8 +135,12 @@ main:
     movss xmm5, xmm0
     movss xmm6, xmm0
     movss xmm9, [abs_mask]
+    mov r12, [fileptr]
 
     main_loop:
+    ;запись в файл
+        
+    ; осн. логика
         movss xmm7, xmm4
         subss xmm7, xmm5
         divss xmm7,xmm5
@@ -164,13 +169,15 @@ exit_error_file:
     mov rdi, msg_error_file
     xor rax, rax
     call printf
-    jmp exit_error
+    mov rax, 1
+    jmp  exit_inner
 exit_error_usage:
     mov  rdi, msg_usage
     mov  rsi, [rsi]
     xor  rax, rax
     call printf
-    jmp  exit_error
+    mov rax, 1
+    jmp  exit_inner
 exit_error_range:
     mov rdi, msg_error_range
     xor rax, rax
@@ -183,9 +190,13 @@ exit_error_input:
     jmp exit_error
 
 exit_error:
+    mov rdi, [fileptr]
+    call fclose
     mov rax, 1
     jmp exit_inner
 exit_success:
+    mov rdi, [fileptr]
+    call fclose
     mov rax, 0
 exit_inner:
     mov rsp, rbp
